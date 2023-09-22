@@ -1,7 +1,5 @@
-import { Request, Response } from "express";
-import { user as userSchema } from "../db/schema";
-import { db } from "../db";
-import { hashPassword } from "../utils/hashPassword";
+import { NextFunction, Request, Response } from "express";
+import { registerUser } from "../services/auth.service";
 
 type IRequest = {
   email: string;
@@ -9,26 +7,24 @@ type IRequest = {
   confirmPassword: string;
 };
 
-export const register = async (req: Request<IRequest>, res: Response) => {
-  const { name, email, password, confirmPassword } = req.body;
+export const register = async (
+  req: Request<IRequest>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await registerUser(req);
 
-  if (password !== confirmPassword) {
     return res
       .json({
-        message: "Invalid Credentials!",
+        data: user,
       })
-      .status(400);
+      .status(200);
+  } catch (err) {
+    next(err);
   }
+};
 
-  const hashedPassword = await hashPassword(password);
-
-  const user = await db
-    .insert(userSchema)
-    .values({ email, name, password: hashedPassword });
-
-  return res
-    .json({
-      data: user,
-    })
-    .status(200);
+export const login = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
 };

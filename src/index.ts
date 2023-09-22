@@ -1,7 +1,10 @@
 import express, { Request, Response } from "express";
-import categoryRoute from "./routes";
+import route from "./routes";
 import cors from "cors";
 import morgan from "morgan";
+
+import notFoundMiddleware from "./middlewares/not-found";
+import errorHandlerMiddleware from "./middlewares/handle-error";
 
 const app = express();
 const port = 3000;
@@ -23,6 +26,9 @@ app.get("/", (req: Request, res: Response): Response => {
     .status(200);
 });
 
-app.use("/api/v1", categoryRoute);
+app.use("/api/v1", route);
+
+app.use(notFoundMiddleware)
+app.use(errorHandlerMiddleware)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
